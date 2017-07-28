@@ -9,6 +9,14 @@
 @main("Welcome to Play") {
   <h1>Things</h1>
 
+  @if(weatherQueryForm.hasGlobalErrors) {
+    <ul>
+      @for(error <- weatherQueryForm.errors) {
+        <li><strong>@error.key</strong>: @error.message</li>
+      }
+    </ul>
+  }
+
   @helper.form(action = routes.HomeController.post()) {
     @CSRF.formField
     @helper.inputText(weatherQueryForm("resolution"))

@@ -19,24 +19,22 @@ case class WeatherQuery(
 class HomeController @Inject()(cc: ControllerComponents)
   extends AbstractController(cc) with play.api.i18n.I18nSupport {
 
-  def validate(weatherQuery : WeatherQuery) = {
-    weatherQuery.resolution match {
-      case "Week" =>
-        Some(weatherQuery)
-      case _ =>
-        None
-    }
+  def validateDateRange(startDate: Date, endDate: Date) = {
+    startDate.before(endDate)
   }
 
   val weatherQueryForm = Form(
     mapping(
       // "stations" -> list(number),
-      "resolution" -> text,
+      "resolution" -> nonEmptyText,
       "startDate" -> date,
       "endDate" -> date,
-      )(WeatherQuery.apply)(WeatherQuery.unapply) verifying("Badddd stuff", fields => fields match {
-        case weatherQuery => validate(weatherQuery).isDefined
-      })
+      )(WeatherQuery.apply)(WeatherQuery.unapply) verifying(
+        "startDate must come before endDate",
+        fields => fields match {
+          case weatherQuery => validateDateRange(weatherQuery.startDate, weatherQuery.endDate)
+        }
+      )
   )
 
   def index() = Action { implicit request: Request[AnyContent] =>
@@ -44,12 +42,9 @@ class HomeController @Inject()(cc: ControllerComponents)
   }
 
   def post() = Action { implicit request =>
-    val weatherQuery = request.body
-    println(weatherQuery)
-
     weatherQueryForm.bindFromRequest.fold(
       formWithErrors => {
-        Ok("you made a bad from!!!!!")
+        Ok(views.html.index(formWithErrors))
       },
       weatherQuery => {
         Ok("very GOOD FROM!")
