@@ -1,5 +1,20 @@
-@()
+@(weatherQueryForm: Form[WeatherQuery])(
+  implicit
+    request: RequestHeader,
+    messagesProvider: MessagesProvider
+)
+
+@import helper._
 
 @main("Welcome to Play") {
-  <h1>Welcome to Play!</h1>
+  <h1>Things</h1>
+
+  @helper.form(action = routes.HomeController.post()) {
+    @CSRF.formField
+    @helper.inputText(weatherQueryForm("resolution"))
+    @helper.inputDate(weatherQueryForm("startDate"))
+    @helper.inputDate(weatherQueryForm("endDate"))
+
+    <input type="submit" value="Get dat weather" />
+  }
 }
