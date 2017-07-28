@@ -17,7 +17,7 @@
     </ul>
   }
 
-  @helper.form(action = routes.HomeController.post()) {
+  @helper.form(action = routes.WeatherQueriesController.post()) {
     @CSRF.formField
     @helper.select(
       field = weatherQueryForm("resolution"),
