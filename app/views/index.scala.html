@@ -19,7 +19,10 @@
 
   @helper.form(action = routes.HomeController.post()) {
     @CSRF.formField
-    @helper.inputText(weatherQueryForm("resolution"))
+    @helper.select(
+      field = weatherQueryForm("resolution"),
+      options = Seq("hour" -> "Hour", "day" -> "Day", "week" -> "Week")
+    )
     @helper.inputDate(weatherQueryForm("startDate"))
     @helper.inputDate(weatherQueryForm("endDate"))
 

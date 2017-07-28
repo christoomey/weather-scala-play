@@ -9,7 +9,6 @@ import play.api.data._
 import play.api.data.Forms._
 
 case class WeatherQuery(
-  // stations: List[Int],
   resolution: String,
   startDate: Date,
   endDate: Date,
@@ -25,7 +24,6 @@ class HomeController @Inject()(cc: ControllerComponents)
 
   val weatherQueryForm = Form(
     mapping(
-      // "stations" -> list(number),
       "resolution" -> nonEmptyText,
       "startDate" -> date,
       "endDate" -> date,
