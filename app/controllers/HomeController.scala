@@ -32,5 +32,9 @@ class HomeController @Inject()(cc: ControllerComponents)
     Ok(views.html.index(weatherQueryForm))
   }
 
-  def post() = TODO
+  def post() = Action(parse.form(weatherQueryForm)) { implicit request =>
+    val weatherQuery = request.body
+    println(weatherQuery)
+    Redirect(routes.HomeController.index())
+  }
 }
