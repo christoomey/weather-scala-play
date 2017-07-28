@@ -2,4 +2,7 @@
 
 set -e
 
+createdb weatherQueries &> /dev/null || true
+psql -d weatherQueries -f sql/weatherQueries.sql
+
 sbt compile

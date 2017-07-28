@@ -1,4 +1,4 @@
-@(weatherQueryForm: Form[WeatherQuery])(
+@(weatherQueryForm: Form[WeatherQuery], weatherQueries: Seq[WeatherQuery])(
   implicit
     request: RequestHeader,
     messagesProvider: MessagesProvider
@@ -28,4 +28,24 @@
 
     <input type="submit" value="Get dat weather" />
   }
+
+  <table>
+
+    <thead>
+      <tr>
+        <th>Resolution</th>
+        <th>startDate</th>
+        <th>endDate</th>
+      </tr>
+    </thead>
+
+  @for(weatherQuery <- weatherQueries) {
+    <tr>
+      <td>@weatherQuery.resolution</td>
+      <td>@weatherQuery.startDate</td>
+      <td>@weatherQuery.endDate</td>
+    </tr>
+  }
+
+  </table>
 }
