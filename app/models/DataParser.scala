@@ -36,7 +36,7 @@ class DataParser(
 
   def superFlow: Flow[Station, Result, Any] =
     Flow[Station]
-      .mapAsync(3)(dataFor(_))
+      .mapAsync(4)(dataFor(_))
       .mapConcat(identity)
 
   def resolve(resolution: Resolution): Flow[Result, Result, Any] =
@@ -58,16 +58,27 @@ class DataParser(
       case Year => (_.year)
     }
     Flow[Result]
-      .groupBy(1000, key(_))
-      .reduce((l, r) =>
-          Result(station = l.station,
-                 key = nextKey(l),
-                 year = l.year,
-                 month = l.month,
-                 day = l.day,
-                 rainfall = l.rainfall + r.rainfall)
-        )
-      .mergeSubstreams
+      .statefulMapConcat { () =>
+        var state: Option[Result] = None
+
+        result => {
+          val currentResult = state.getOrElse(result)
+
+          if (key(result) == key(currentResult)) {
+            state = Some(Result(station = currentResult.station,
+                  key = key(currentResult),
+                  year = currentResult.year,
+                  month = currentResult.month,
+                  day = currentResult.day,
+                  rainfall = currentResult.rainfall + result.rainfall))
+            List()
+          } else {
+            val thingToReturn = currentResult.copy(key = nextKey(currentResult))
+            state = Some(result)
+            List(thingToReturn)
+          }
+        }
+      }
   }
 
   def dataFor(station: Station): Future[List[Result]] =
