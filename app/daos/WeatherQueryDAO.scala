@@ -16,6 +16,10 @@ class WeatherQueryDAO @Inject() (protected val dbConfigProvider: DatabaseConfigP
 
   def all(): Future[Seq[WeatherQuery]] = db.run(WeatherQueries.result)
 
+  def find(id: Int): Future[Option[WeatherQuery]] = {
+    db.run(WeatherQueries.filter(_.id === id).result.headOption)
+  }
+
   def insert(weatherQuery: WeatherQuery): Future[WeatherQuery] = {
     db.run((WeatherQueries returning WeatherQueries.map(_.id)) += weatherQuery).map { id =>
       weatherQuery.copy(id = Some(id))

@@ -43,7 +43,14 @@ class WeatherQueriesController @Inject()(
   }
 
   def show(id: Int) = Action.async { implicit request =>
-    Future { Ok(s"$id") }
+    weatherQueryDAO.find(id).map { weatherQueryOption =>
+      weatherQueryOption match {
+        case Some(weatherQuery) => {
+          Ok(views.html.weather_queries.show(weatherQuery))
+        }
+        case None => { NotFound(s"$id iz Bad From!") }
+      }
+    }
   }
 
   def post() = Action.async { implicit request =>

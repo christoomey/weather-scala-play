@@ -1,0 +1,34 @@
+@(weatherQuery: WeatherQuery)
+
+@main("Whether") {
+  <h1>Weather Query @weatherQuery.id</h1>
+
+  <table>
+    <thead>
+      <tr>
+        <th>
+          Resolution
+        </th>
+        <th>
+          Start Date
+        </th>
+        <th>
+          End Date
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          @weatherQuery.resolution
+        </td>
+        <td>
+          @weatherQuery.startDate
+        </td>
+        <td>
+          @weatherQuery.endDate
+        </td>
+      </tr>
+    </tbody>
+  </table
+}
