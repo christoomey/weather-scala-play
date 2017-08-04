@@ -1,4 +1,4 @@
-@(weatherQuery: WeatherQuery)
+@(results: List[gubmint.WeatherResult], weatherQuery: WeatherQuery)
 
 @main("Whether") {
   <h1>Weather Query @weatherQuery.id</h1>
@@ -31,4 +31,8 @@
       </tr>
     </tbody>
   </table
+
+  @for(result <- results) {
+    <p>@result</p>
+  }
 }

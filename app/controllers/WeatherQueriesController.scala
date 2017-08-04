@@ -1,7 +1,8 @@
 package controllers
 
 import java.sql.Date
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ ExecutionContext, Future, Await }
+import scala.concurrent.duration._
 import javax.inject._
 import play.api._
 import play.api.mvc._
@@ -9,6 +10,8 @@ import play.api.data._
 import play.api.data.Forms._
 
 import dao.WeatherQueryDAO
+import gubmint.Main.{ theThingWeDo => getWeatherResults }
+import gubmint.Resolution
 import models.WeatherQuery
 
 @Singleton
@@ -46,11 +49,24 @@ class WeatherQueriesController @Inject()(
     weatherQueryDAO.find(id).map { weatherQueryOption =>
       weatherQueryOption match {
         case Some(weatherQuery) => {
-          Ok(views.html.weather_queries.show(weatherQuery))
+          val resolvedWeather = getWeatherResults(
+            stationIds = List("CQC00914080", "RQC00661901"),
+            startDate = throopleFromDate(weatherQuery.startDate),
+            endDate = throopleFromDate(weatherQuery.endDate),
+            resolution = Resolution.fromString(weatherQuery.resolution)
+          )
+
+          val results = Await.result(resolvedWeather, 10.seconds)
+
+          Ok(views.html.weather_queries.show(results, weatherQuery))
         }
         case None => { NotFound(s"$id iz Bad From!") }
       }
     }
+  }
+
+  def throopleFromDate(date: Date): (Int, Int, Int) = {
+    (date.getYear() + 1900, date.getMonth() + 1, date.getDate())
   }
 
   def post() = Action.async { implicit request =>

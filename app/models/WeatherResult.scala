@@ -1,6 +1,6 @@
 package gubmint
 
-case class Result(station: Station,
+case class WeatherResult(station: Station,
                   key: Int,
                   year: Int,
                   month: Int,

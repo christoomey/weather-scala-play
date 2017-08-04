@@ -14,18 +14,18 @@ class DataParser(
     implicit val mat: Materializer) {
   import Resolution.{Year, Month, Day}
 
-  def find(stations: List[Station]): Future[List[Result]] =
+  def find(stations: List[Station]): Future[List[WeatherResult]] =
     Source(stations)
       .via(superFlow)
       .toMat(sinkThatMakesAList)(Keep.right)
       .run()
 
-  def weatherDataToResult: Flow[(Station, WeatherData), Result, Any] =
+  def weatherDataToWeatherResult: Flow[(Station, WeatherData), WeatherResult, Any] =
     Flow[(Station, WeatherData)]
       .mapConcat { case (station, weatherData) =>
         weatherData.dataPackets.collect {
           case dataPacket if dataPacket.value != -9999 =>
-            Result(station = station,
+            WeatherResult(station = station,
               key = weatherData.day,
               year = weatherData.year,
               month = weatherData.month,
@@ -34,38 +34,38 @@ class DataParser(
         }
       }
 
-  def superFlow: Flow[Station, Result, Any] =
+  def superFlow: Flow[Station, WeatherResult, Any] =
     Flow[Station]
       .mapAsync(4)(dataFor(_))
       .mapConcat(identity)
 
-  def resolve(resolution: Resolution): Flow[Result, Result, Any] =
+  def resolve(resolution: Resolution): Flow[WeatherResult, WeatherResult, Any] =
     resolution match {
-      case Year => Flow[Result].via(aggregateResult(Year)).via(resolve(Month))
-      case Month => Flow[Result].via(aggregateResult(Month)).via(resolve(Day))
-      case Day => Flow[Result].via(aggregateResult(Day))
+      case Year => Flow[WeatherResult].via(aggregateWeatherResult(Year)).via(resolve(Month))
+      case Month => Flow[WeatherResult].via(aggregateWeatherResult(Month)).via(resolve(Day))
+      case Day => Flow[WeatherResult].via(aggregateWeatherResult(Day))
     }
 
-  def aggregateResult(resolution: Resolution): Flow[Result, Result, Any] = {
-    val nextKey: Result => Int = resolution match {
+  def aggregateWeatherResult(resolution: Resolution): Flow[WeatherResult, WeatherResult, Any] = {
+    val nextKey: WeatherResult => Int = resolution match {
       case Day => (_.month)
       case Month => (_.year)
       case Year => (_ => 0)
     }
-    val key: Result => Int = resolution match {
+    val key: WeatherResult => Int = resolution match {
       case Day => (x => x.day + (x.month * 100) + (x.year * 10000))
       case Month => (x => x.month + x.year + 100)
       case Year => (_.year)
     }
-    Flow[Result]
+    Flow[WeatherResult]
       .statefulMapConcat { () =>
-        var state: Option[Result] = None
+        var state: Option[WeatherResult] = None
 
         result => {
           val currentResult = state.getOrElse(result)
 
           if (key(result) == key(currentResult)) {
-            state = Some(Result(station = currentResult.station,
+            state = Some(WeatherResult(station = currentResult.station,
                   key = key(currentResult),
                   year = currentResult.year,
                   month = currentResult.month,
@@ -81,12 +81,12 @@ class DataParser(
       }
   }
 
-  def dataFor(station: Station): Future[List[Result]] =
+  def dataFor(station: Station): Future[List[WeatherResult]] =
     inputStream(station.id)
       .via(parse)
       .filter(dateBetween(startDate, endDate))
       .map((station, _))
-      .via(weatherDataToResult)
+      .via(weatherDataToWeatherResult)
       .via(resolve(resolution))
       .toMat(sinkThatMakesAList)(Keep.right)
       .run()

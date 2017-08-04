@@ -21,7 +21,7 @@
     @CSRF.formField
     @helper.select(
       field = weatherQueryForm("resolution"),
-      options = Seq("hour" -> "Hour", "day" -> "Day", "week" -> "Week")
+      options = Seq("day" -> "Day", "month" -> "Month", "year" -> "Year")
     )
     @helper.inputDate(weatherQueryForm("startDate"))
     @helper.inputDate(weatherQueryForm("endDate"))
@@ -33,6 +33,7 @@
 
     <thead>
       <tr>
+        <th>ID</th>
         <th>Resolution</th>
         <th>startDate</th>
         <th>endDate</th>
@@ -41,9 +42,14 @@
 
   @for(weatherQuery <- weatherQueries) {
     <tr>
-      <td>@weatherQuery.resolution</td>
-      <td>@weatherQuery.startDate</td>
-      <td>@weatherQuery.endDate</td>
+      <td>
+        <a href="@routes.WeatherQueriesController.show(weatherQuery.id.getOrElse(999))">
+          @weatherQuery.id.getOrElse(999)
+        </a>
+      </td>
+        <td>@weatherQuery.resolution</td>
+        <td>@weatherQuery.startDate</td>
+        <td>@weatherQuery.endDate</td>
     </tr>
   }
 
