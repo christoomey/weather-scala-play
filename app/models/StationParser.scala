@@ -13,7 +13,7 @@ class StationParser(implicit val mat: Materializer) {
       .runWith(findAllById(stationIds))
 
   private def inputStream: Source[ByteString, Any] =
-    FileIO.fromPath(Paths.get("data/hpd-stations.txt"))
+    FileIO.fromPath(Paths.get("./data/hpd-stations.txt"))
 
   private def parse: Flow[ByteString, Station, Any] =
     Flow[ByteString]

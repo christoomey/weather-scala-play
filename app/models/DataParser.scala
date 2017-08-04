@@ -116,7 +116,7 @@ class DataParser(
   }
 
   private def inputStream(stationId: String): Source[ByteString, Any] =
-    FileIO.fromPath(Paths.get(s"data/all/${stationId}.hly"))
+    FileIO.fromPath(Paths.get(s"./data/all/${stationId}.hly"))
 
   private def parse: Flow[ByteString, WeatherData, Any] =
     Flow[ByteString]
