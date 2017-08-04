@@ -30,9 +30,47 @@
         </td>
       </tr>
     </tbody>
-  </table
+  </table>
 
-  @for(result <- results) {
-    <p>@result</p>
-  }
+  <table>
+    <thead>
+      <tr>
+        <th>
+          Station
+        </th>
+        <th>
+          Key
+        </th>
+        <th>
+          Year/Month/Day
+        </th>
+        <th>
+          Rainfall
+        </th>
+      </tr>
+    </thead>
+
+    <tbody>
+      @for(result <- results) {
+        <tr>
+          <td>
+            @result.station
+          </td>
+          <td>
+            @result.key
+          </td>
+          <td>
+            @result.year
+            /
+            @result.month
+            /
+            @result.day
+          </td>
+          <td>
+            @result.rainfall
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
 }
